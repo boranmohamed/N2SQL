@@ -1,0 +1,17 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+pydantic==2.5.0
+pydantic-settings==2.1.0
+loguru==0.7.2
+httpx==0.25.2
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# RAG System Dependencies (Qdrant-based)
+qdrant-client>=1.13.3
+sentence-transformers>=5.1.0
+numpy>=2.0.0
+pandas>=2.0.3
+openpyxl>=3.1.0
+python-multipart==0.0.6

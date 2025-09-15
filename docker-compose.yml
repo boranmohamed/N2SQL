@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: vanna_postgres
+    environment:
+      POSTGRES_DB: vanna_app
+      POSTGRES_USER: vanna_user
+      POSTGRES_PASSWORD: vanna_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vanna_user -d vanna_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vanna_network
+
+  # Vanna AI Web Application
+  app:
+    build: .
+    container_name: vanna_app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://vanna_user:vanna_password@postgres:5432/vanna_app
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - VANNA_API_KEY=${VANNA_API_KEY:-}
+      - VANNA_MODEL=gpt-4
+      - VANNA_MAX_TOKENS=1000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - vanna_network
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: vanna_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vanna_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  vanna_network:
+    driver: bridge
