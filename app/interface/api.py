@@ -3,15 +3,16 @@ FastAPI application with all endpoints.
 """
 import time
 from datetime import datetime
-from typing import Any
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from ..application.use_cases import HealthCheckUseCase, ProcessQueryUseCase
-from ..domain.entities import QueryRequest, QueryResponse, HealthStatus
+# Domain entities imported as needed
 from ..infrastructure.database import db_manager, SQLiteDatabaseRepository
 from ..infrastructure.query_repository import InMemoryQueryRepository
 from ..infrastructure.vanna_factory import get_vanna_client_from_env
@@ -107,6 +108,22 @@ async def shutdown_event() -> None:
 
 # Create the FastAPI app instance
 app = create_app()
+
+# Mount static files and templates
+templates_path = Path(__file__).parent.parent.parent / "templates"
+if templates_path.exists():
+    app.mount("/static", StaticFiles(directory=str(templates_path)), name="static")
+
+# Add route to serve the main HTML page
+@app.get("/")
+async def serve_frontend():
+    """Serve the main frontend HTML page."""
+    templates_path = Path(__file__).parent.parent.parent / "templates"
+    index_path = templates_path / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    else:
+        return {"message": "Frontend not found. Please ensure templates/index.html exists."}
 
 
 @app.get(

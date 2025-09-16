@@ -106,17 +106,13 @@ echo DATABASE_URL=sqlite:///vanna_app_clean.db >> .env
 pip install -e .
 
 # Start the web interface
-python start_visual_tester.py
+python run.py
 ```
 
 #### **Step 5: Migrate Schema Data to Qdrant**
 
 ```bash
-# Run the migration script to populate Qdrant with schema data
-python migrate_to_docker_qdrant.py
-
-# Train local Vanna with RAG context
-python train_with_rag_context.py
+# The application will automatically initialize the database and RAG system on first run
 ```
 
 ### Remote Vanna AI Setup (Alternative)
@@ -217,7 +213,7 @@ pytest
 pytest --cov=app --cov-report=html
 
 # Run specific test file
-pytest tests/test_api.py
+pytest
 
 # Run with verbose output
 pytest -v
@@ -319,14 +315,14 @@ This section explains the complete pipeline from user input to database executio
   4. Makes HTTP POST request to `/api/generate`
 
 #### **Step 2: Flask Web Interface (Backend Router)**
-- **Location**: `vanna_visual_tester.py` - Flask route `/api/generate`
+- **Location**: `app/interface/api.py` - FastAPI endpoint `/api/query`
 - **Process**:
   1. Flask receives POST request with question
   2. Calls `tester.generate_sql_sync(question)`
   3. Returns JSON response with generated SQL
 
 #### **Step 3: VannaTester Client (Synchronous Wrapper)**
-- **Location**: `vanna_visual_tester.py` - `VannaTester.generate_sql_sync()`
+- **Location**: `app/application/use_cases.py` - `ProcessQueryUseCase.execute()`
 - **Process**:
   1. Creates new asyncio event loop (Flask is synchronous)
   2. Calls `self.client.generate_sql(question)` asynchronously
@@ -365,7 +361,7 @@ This section explains the complete pipeline from user input to database executio
   4. **Response**: Structured JSON back through the chain
 
 #### **Step 8: SQL Execution (Database Layer)**
-- **Location**: `vanna_visual_tester.py` - `execute_sql()`
+- **Location**: `app/infrastructure/database.py` - `SQLiteDatabaseRepository.execute_query()`
 - **Process**:
   1. **SQLite Connection**: Connects to `vanna_app_clean.db`
   2. **SQL Compatibility**: Fixes PostgreSQL/MySQL → SQLite syntax

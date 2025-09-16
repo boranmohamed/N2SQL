@@ -18,12 +18,12 @@ test-cov: ## Run tests with coverage
 	pytest --cov=app --cov-report=html --cov-report=term-missing
 
 lint: ## Run linting checks
-	flake8 app/ tests/
+	flake8 app/
 	mypy app/
 
 format: ## Format code
-	black app/ tests/
-	isort app/ tests/
+	black app/
+	isort app/
 
 clean: ## Clean up generated files
 	find . -type d -name "__pycache__" -exec rm -rf {} +

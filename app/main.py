@@ -7,7 +7,6 @@ from pathlib import Path
 from loguru import logger
 
 from .infrastructure.config import settings
-from .interface.api import app
 
 
 def setup_logging() -> None:
@@ -51,6 +50,15 @@ def main() -> None:
     logger.info(f"Database URL: {settings.database_url}")
     logger.info(f"Vanna AI Model: {settings.vanna_model}")
     
+    # Log frontend information
+    templates_path = Path(__file__).parent.parent / "templates"
+    if templates_path.exists():
+        logger.info(f"Frontend templates found at: {templates_path}")
+        logger.info(f"🌐 Frontend will be available at: http://{settings.host}:{settings.port}")
+        logger.info(f"📊 API documentation at: http://{settings.host}:{settings.port}/docs")
+    else:
+        logger.warning(f"Frontend templates not found at: {templates_path}")
+    
     # Import and run uvicorn
     import uvicorn
     
@@ -59,7 +67,7 @@ def main() -> None:
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level=settings.log_level.lower(),
+        log_level=str(settings.log_level).lower(),
     )
 
 

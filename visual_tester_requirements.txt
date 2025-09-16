@@ -1,5 +1,0 @@
-# Requirements for Vanna Visual Tester Web Interface
-Flask==2.3.3
-pandas==2.1.0
-asyncio
-sqlite3
