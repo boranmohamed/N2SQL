@@ -133,26 +133,26 @@ class VannaClientRepository(VannaRepository):
             return False
 
         try:
-            logger.info("📚 Training Vanna AI model with database schema...")
+            logger.info("Training Vanna AI model with database schema...")
 
             # Get database schema from RAG system
             if hasattr(self, '_rag_system') and self._rag_system:
                 try:
                     schema_context = self._rag_system.get_schema_context()
-                    logger.info(f"✅ Retrieved schema context from RAG system ({len(schema_context)} chars)")
-                    logger.info(f"📄 Schema context preview: {schema_context[:200]}...")
+                    logger.info(f"Retrieved schema context from RAG system ({len(schema_context)} chars)")
+                    logger.info(f"Schema context preview: {schema_context[:200]}...")
                 except Exception as e:
-                    logger.error(f"❌ Failed to get schema context from RAG: {e}")
+                    logger.error(f"Failed to get schema context from RAG: {e}")
                     raise RuntimeError("RAG system is required for schema context - cannot proceed without it")
             else:
-                logger.error("❌ RAG system not available")
+                logger.error("RAG system not available")
                 raise RuntimeError("RAG system is required for schema context - cannot proceed without it")
 
             # Train Vanna AI with the schema
-            logger.info("🚀 Training Vanna AI with schema...")
+            logger.info("Training Vanna AI with schema...")
             try:
                 result = self._vanna_client.train(ddl=schema_context)
-                logger.info("✅ Vanna AI schema training completed")
+                logger.info("Vanna AI schema training completed")
 
                 # Add example Q&A pairs for better SQL generation
                 examples = [
@@ -173,19 +173,19 @@ class VannaClientRepository(VannaRepository):
                     try:
                         self._vanna_client.train(question=question, sql=sql)
                     except Exception as e:
-                        logger.warning(f"⚠️ Failed to add example '{question}': {e}")
+                        logger.warning(f"Failed to add example '{question}': {e}")
 
-                logger.info("✅ Vanna AI training completed successfully")
-                logger.info(f"📊 Training result: {result}")
+                logger.info("Vanna AI training completed successfully")
+                logger.info(f"Training result: {result}")
                 return True
 
             except Exception as e:
-                logger.error(f"❌ Vanna AI training failed: {e}")
-                logger.error(f"🔍 Error type: {type(e).__name__}")
+                logger.error(f"Vanna AI training failed: {e}")
+                logger.error(f"Error type: {type(e).__name__}")
                 return False
 
         except Exception as e:
-            logger.error(f"❌ Failed to train Vanna AI model: {e}")
+            logger.error(f"Failed to train Vanna AI model: {e}")
             return False
         
         
@@ -200,13 +200,13 @@ class VannaClientRepository(VannaRepository):
             # Test with a simple query
             test_result = self._vanna_client.ask("SELECT 1")
             if test_result and isinstance(test_result, str) and test_result.strip():
-                logger.info("✅ Vanna AI connection successful")
+                logger.info("Vanna AI connection successful")
                 return True
             elif isinstance(test_result, tuple) and test_result[0] and str(test_result[0]).strip():
-                logger.info("✅ Vanna AI connection successful (tuple result)")
+                logger.info("Vanna AI connection successful (tuple result)")
                 return True
             else:
-                logger.warning("⚠️ Vanna AI connection test returned unexpected result")
+                logger.warning("Vanna AI connection test returned unexpected result")
                 return False
 
         except Exception as e:
